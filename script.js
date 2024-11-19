@@ -1,150 +1,86 @@
-class Tarea {
-    constructor(id, descripcion) {
-        this.id = id;
-        this.descripcion = descripcion;
-        this.timestamp = new Date(); // Almacena la fecha y hora actual
-    }
-    getDescripcion() {
-        return this.descripcion;
-    }
-    setDescripcion(descripcion) {
-        this.descripcion = descripcion;
-    }
+const lista = document.getElementById('lista');
+let editarId = null;
+
+const agregarMod = document.getElementById('agregarMod');
+const abrirAgregarMod = document.getElementById('abrirAgregarMod');
+const agregarForm = document.getElementById('agregarForm');
+const descInput = document.getElementById('descInput');
+const idInput = document.getElementById('idInput');
+const nombreMod = document.getElementById('nombreMod');
+
+const confirmarDel = document.getElementById('confirmarDel');
+const cancelarDel = document.getElementById('cancelarDel');
+const btnDel = document.getElementById('btnDel');
+let eliminarTarea = null;
+
+abrirAgregarMod.addEventListener('click', function() {
+  editarId = null;
+  nombreMod.textContent = 'Añadir Nueva Tarea';
+  descInput.value = '';
+  idInput.value = '';
+  agregarMod.style.display = 'flex';
+});
+
+window.addEventListener('click', function(event) {
+  if (event.target === agregarMod) {
+    agregarMod.style.display = 'none';
+  }
+  if (event.target === confirmarDel) {
+    confirmarDel.style.display = 'none';
+  }
+});
+
+agregarForm.addEventListener('submit', function(event) {
+  event.preventDefault();
+  const descTarea = descInput.value;
+  const idTarea = idInput.value;
+
+  if (idTarea) {
+    const row = document.querySelector(`tr[data-id="${idTarea}"]`);
+    row.querySelector('.descripcionTarea').textContent = descTarea;
+  } else {
+    const newidTarea = lista.children.length + 1;
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', newidTarea);
+    row.innerHTML = `
+      <td>${newidTarea}</td>
+      <td class="descripcionTarea">${descTarea}</td>
+      <td>
+        <button class="btn btnEditar" onclick="editarTarea(${newidTarea})">Editar</button>
+        <button class="btn btnBorrar" onclick="delConfirmar(${newidTarea})">Eliminar</button>
+      </td>
+    `;
+    lista.appendChild(row);
+  }
+
+  agregarMod.style.display = 'none';
+});
+
+function editarTarea(id) {
+  editarId = id;
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  const descTarea = row.querySelector('.descripcionTarea').textContent;
+
+  descInput.value = descTarea;
+  idInput.value = id;
+  nombreMod.textContent = 'Editar Tarea';
+  agregarMod.style.display = 'flex';
 }
 
-class TareaManager {
-    constructor() {
-        this.tareas = this.loadTareas();
-    }
-
-    addTarea(tarea) {
-        this.tareas.push(tarea);
-        this.saveTareas();
-    }
-
-    getNextId() {
-        return this.tareas.length ? Math.max(...this.tareas.map(t => t.id)) + 1 : 1;
-    }
-
-    updateTarea(id, descripcion) {
-        const tarea = this.tareas.find(t => t.id === id);
-        if (tarea) {
-            tarea.setDescripcion(descripcion);
-            this.saveTareas();
-        } else {
-            console.error("Tarea no encontrada");
-        }
-    }
-
-    deleteTarea(id) {
-        this.tareas = this.tareas.filter(t => t.id !== id);
-        this.saveTareas();
-    }
-
-    saveTareas() {
-        document.cookie = `tareas=${encodeURIComponent(JSON.stringify(this.tareas))}; path=/`;
-    }
-
-    loadTareas() {
-        const cookies = document.cookie.split("; ").find(row => row.startsWith("tareas="));
-        if (cookies) {
-            try {
-                const tareasJson = JSON.parse(decodeURIComponent(cookies.split("=")[1]));
-                // Reconstruir las instancias de Tarea
-                return tareasJson.map(tareaData => new Tarea(tareaData.id, tareaData.descripcion));
-            } catch (e) {
-                console.error("Error al cargar tareas:", e);
-                return [];
-            }
-        }
-        return [];
-    }
+function delConfirmar(id) {
+  eliminarTarea = id;
+  confirmarDel.style.display = 'flex';
 }
 
-const taskManager = new TareaManager();
-const taskTableBody = document.getElementById("taskTableBody");
-const taskModal = document.getElementById("taskModal");
-const deleteModal = document.getElementById("deleteModal");
+cancelarDel.addEventListener('click', function() {
+  confirmarDel.style.display = 'none';
+});
 
-let currentTaskId = null;
-
-document.getElementById("BtnAgregar").addEventListener("click", () => openModal("add"));
-
-document.getElementById("saveTaskBtn").addEventListener("click", saveTask);
-document.getElementById("confirmDeleteBtn").addEventListener("click", confirmDelete);
-document.getElementById("cancelDeleteBtn").addEventListener("click", closeDeleteModal);
-
-document.querySelectorAll(".close").forEach(closeBtn => closeBtn.addEventListener("click", closeModal));
-
-function renderTareas() {
-    taskTableBody.innerHTML = "";
-    taskManager.tareas.forEach(tarea => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${tarea.timestamp.toLocaleString()}</td> <!-- Mostrar la fecha y hora -->
-            <td>${tarea.descripcion}</td>
-            <td>
-                <button onclick="openModal('edit', ${tarea.id})">Editar</button>
-                <button onclick="openDeleteModal(${tarea.id})">Eliminar</button>
-            </td>
-        `;
-        taskTableBody.appendChild(row);
-    });
-}
-
-function openModal(mode, id = null) {
-    if (mode === "add") {
-        currentTaskId = null;
-        document.getElementById("modalTitle").textContent = "Añadir Tarea";
-        document.getElementById("taskDescription").value = "";
-    } else if (mode === "edit") {
-        currentTaskId = id;
-        const tarea = taskManager.tareas.find(t => t.id === id);
-        if (tarea) {
-            document.getElementById("modalTitle").textContent = "Editar Tarea";
-            document.getElementById("taskDescription").value = tarea.descripcion;
-        } else {
-            console.error("Tarea no encontrada para editar");
-        }
-    }
-    taskModal.style.display = "flex";
-}
-
-function saveTask() {
-    const descripcion = document.getElementById("taskDescription").value.trim();
-    if (!descripcion) {
-        alert("La descripción no puede estar vacía.");
-        return;
-    }
-
-    if (currentTaskId === null) {
-        const id = taskManager.getNextId();
-        taskManager.addTarea(new Tarea(id, descripcion));
-    } else {
-        taskManager.updateTarea(currentTaskId, descripcion);
-    }
-
-    closeModal();
-    renderTareas();
-}
-
-function openDeleteModal(id) {
-    currentTaskId = id;
-    deleteModal.style.display = "flex";
-}
-
-function confirmDelete() {
-    taskManager.deleteTarea(currentTaskId);
-    closeDeleteModal();
-    renderTareas();
-}
-
-function closeModal() {
-    taskModal.style.display = "none";
-}
-
-function closeDeleteModal() {
-    deleteModal.style.display = "none";
-}
-
-renderTareas();
+btnDel.addEventListener('click', function() {
+  if (eliminarTarea !== null) {
+    const row = document.querySelector(`tr[data-id="${eliminarTarea}"]`);
+    row.remove();
+    eliminarTarea = null;
+  }
+  confirmarDel.style.display = 'none';
+});
