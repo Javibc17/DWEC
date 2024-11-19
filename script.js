@@ -1,8 +1,8 @@
-// Clase Tarea
 class Tarea {
     constructor(id, descripcion) {
         this.id = id;
         this.descripcion = descripcion;
+        this.timestamp = new Date(); // Almacena la fecha y hora actual
     }
     getDescripcion() {
         return this.descripcion;
@@ -12,7 +12,6 @@ class Tarea {
     }
 }
 
-// Clase TareaManager
 class TareaManager {
     constructor() {
         this.tareas = this.loadTareas();
@@ -23,11 +22,17 @@ class TareaManager {
         this.saveTareas();
     }
 
+    getNextId() {
+        return this.tareas.length ? Math.max(...this.tareas.map(t => t.id)) + 1 : 1;
+    }
+
     updateTarea(id, descripcion) {
         const tarea = this.tareas.find(t => t.id === id);
         if (tarea) {
             tarea.setDescripcion(descripcion);
             this.saveTareas();
+        } else {
+            console.error("Tarea no encontrada");
         }
     }
 
@@ -37,16 +42,25 @@ class TareaManager {
     }
 
     saveTareas() {
-        document.cookie = `tareas=${JSON.stringify(this.tareas)};path=/`;
+        document.cookie = `tareas=${encodeURIComponent(JSON.stringify(this.tareas))}; path=/`;
     }
 
     loadTareas() {
         const cookies = document.cookie.split("; ").find(row => row.startsWith("tareas="));
-        return cookies ? JSON.parse(cookies.split("=")[1]) : [];
+        if (cookies) {
+            try {
+                const tareasJson = JSON.parse(decodeURIComponent(cookies.split("=")[1]));
+                // Reconstruir las instancias de Tarea
+                return tareasJson.map(tareaData => new Tarea(tareaData.id, tareaData.descripcion));
+            } catch (e) {
+                console.error("Error al cargar tareas:", e);
+                return [];
+            }
+        }
+        return [];
     }
 }
 
-// Variables globales
 const taskManager = new TareaManager();
 const taskTableBody = document.getElementById("taskTableBody");
 const taskModal = document.getElementById("taskModal");
@@ -54,22 +68,20 @@ const deleteModal = document.getElementById("deleteModal");
 
 let currentTaskId = null;
 
-// Eventos de botones
-document.getElementById("addTaskBtn").addEventListener("click", () => openModal("add"));
+document.getElementById("BtnAgregar").addEventListener("click", () => openModal("add"));
+
 document.getElementById("saveTaskBtn").addEventListener("click", saveTask);
 document.getElementById("confirmDeleteBtn").addEventListener("click", confirmDelete);
 document.getElementById("cancelDeleteBtn").addEventListener("click", closeDeleteModal);
 
-// Cerrar modales
 document.querySelectorAll(".close").forEach(closeBtn => closeBtn.addEventListener("click", closeModal));
 
-// Mostrar tareas
 function renderTareas() {
     taskTableBody.innerHTML = "";
     taskManager.tareas.forEach(tarea => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${tarea.id}</td>
+            <td>${tarea.timestamp.toLocaleString()}</td> <!-- Mostrar la fecha y hora -->
             <td>${tarea.descripcion}</td>
             <td>
                 <button onclick="openModal('edit', ${tarea.id})">Editar</button>
@@ -80,7 +92,6 @@ function renderTareas() {
     });
 }
 
-// Función para abrir modal
 function openModal(mode, id = null) {
     if (mode === "add") {
         currentTaskId = null;
@@ -89,13 +100,16 @@ function openModal(mode, id = null) {
     } else if (mode === "edit") {
         currentTaskId = id;
         const tarea = taskManager.tareas.find(t => t.id === id);
-        document.getElementById("modalTitle").textContent = "Editar Tarea";
-        document.getElementById("taskDescription").value = tarea.descripcion;
+        if (tarea) {
+            document.getElementById("modalTitle").textContent = "Editar Tarea";
+            document.getElementById("taskDescription").value = tarea.descripcion;
+        } else {
+            console.error("Tarea no encontrada para editar");
+        }
     }
     taskModal.style.display = "flex";
 }
 
-// Función para guardar tarea
 function saveTask() {
     const descripcion = document.getElementById("taskDescription").value.trim();
     if (!descripcion) {
@@ -104,7 +118,7 @@ function saveTask() {
     }
 
     if (currentTaskId === null) {
-        const id = taskManager.tareas.length ? Math.max(...taskManager.tareas.map(t => t.id)) + 1 : 1;
+        const id = taskManager.getNextId();
         taskManager.addTarea(new Tarea(id, descripcion));
     } else {
         taskManager.updateTarea(currentTaskId, descripcion);
@@ -114,20 +128,17 @@ function saveTask() {
     renderTareas();
 }
 
-// Función para abrir modal de eliminación
 function openDeleteModal(id) {
     currentTaskId = id;
     deleteModal.style.display = "flex";
 }
 
-// Confirmar eliminación
 function confirmDelete() {
     taskManager.deleteTarea(currentTaskId);
     closeDeleteModal();
     renderTareas();
 }
 
-// Cerrar modales
 function closeModal() {
     taskModal.style.display = "none";
 }
@@ -136,5 +147,4 @@ function closeDeleteModal() {
     deleteModal.style.display = "none";
 }
 
-// Render inicial
 renderTareas();
