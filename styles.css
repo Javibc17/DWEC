@@ -1,0 +1,63 @@
+body {
+    font-family: sans-serif;
+    background-color: #ddd;
+}
+
+h2{
+    margin: 10px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+label{
+    display: flex;
+    justify-content: space-between;
+}
+
+input{
+    margin-bottom: 20px;
+    height: 25px;
+}
+
+#clienteBtn, #viajeBtn, #reservaBtn{
+    height: 31px;
+    padding: 4px;
+    background-color:#1191ed;
+    color: white;
+    border-style: none;
+    border-radius: 2px;
+}
+
+select{
+    height: 31px;
+}
+
+.eliminarBtn{
+    height: 31px;
+    background-color: #eb5757;
+    color: white;
+    border-style: none;
+    border-radius: 2px;
+    
+}
+
+th{
+    background-color: black;
+    color: white;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.section {
+    background-color: white;
+    padding: 10px;
+  
+}
+
