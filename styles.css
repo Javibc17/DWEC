@@ -1,6 +1,13 @@
 body {
+    height: 890px;
     font-family: sans-serif;
     background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.all{
+    width: 70%;
 }
 
 h2{
@@ -10,11 +17,6 @@ h2{
 table {
     width: 100%;
     border-collapse: collapse;
-}
-
-label{
-    display: flex;
-    justify-content: space-between;
 }
 
 input{
@@ -55,9 +57,9 @@ th, td {
     border: 1px solid #ddd;
 }
 
-.section {
+#clientes, #viajes, #reservas {
     background-color: white;
     padding: 10px;
-  
+    margin: 10px;
 }
 

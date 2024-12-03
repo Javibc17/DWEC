@@ -3,128 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agencia de viaje</title>
+    <title>Agencia de Viajes</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <div class="section">
-        <h2>Clientes</h2>
+    <div class="all">
+        <div id="clientes">
+            <h2>Clientes</h2>
+            <form id="formClientes">
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre" required minlength="2">
+                <input type="text" id="apellidos" name="apellidos" placeholder="Apellidos" required minlength="2">
+                <input type="email" id="correo" name="correo" placeholder="Correo Electrónico" required>
+                <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" pattern="[0-9]{9}" required>
+                <button type="submit" class="button" id="clienteBtn">Añadir Cliente</button>
+            </form>
+            <table id="tablaClientes">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellidos</th>
+                        <th>Correo Electrónico</th>
+                        <th>Teléfono</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
 
-        <form id="formVuelo">
-            <label for="clientes">
-                <input type="text" placeholder="Nombre">
-                <input type="text" placeholder="Apellidos">
-                <input type="email" placeholder="Correo Electrónico">
-                <input type="tel" placeholder="Teléfono">
-                <button class="button" id="clienteBtn">Añadir Cliente</button>
-            </label>
-        </form>
+        <div id="viajes">
+            <h2>Viajes</h2>
+            <form id="formViajes">
+                <input type="text" id="codigo" name="codigo" placeholder="Código" required>
+                <input type="text" id="destino" name="destino" placeholder="Destino" required>
+                <input type="number" id="precio" name="precio" placeholder="Precio" required min="0">
+                <select name="tipo" id="tipo" required>
+                    <option value="vuelo">Vuelo</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="paquete">Paquete</option>
+                </select>
+                <button type="submit" class="button" id="viajeBtn">Añadir Viaje</button>
+            </form>
+            <table id="tablaViajes">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Destino</th>
+                        <th>Precio</th>
+                        <th>Tipo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
 
-        
-    
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Correo Electrónico</th>
-                    <th>Teléfono</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><button class="eliminarBtn">Eliminar</button></td>
-                </tr>
-            </tbody>
-        </table>
-
-    </div>
-
-    <br>
-
-    <div class="section">
-        <h2>Viajes</h2>
-    
-        <label for="viajes">
-            <input type="text" placeholder="Código">
-            <input type="text" placeholder="Destino">
-            <input type="number" placeholder="Precio">
-            <select name="tipo" id="tipo">
-                <option value="vuelo">Vuelo</option>
-                <option value="hotel">Hotel</option>
-                <option value="paquete">Paquete</option>
-            </select>
-            <button class="button" id="viajeBtn">Añadir Viaje</button>
-        </label>
-        
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Destino</th>
-                    <th>Precio</th>
-                    <th>Tipo</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>2 </td>
-                    <td>Barcelona</td>
-                    <td>300€</td>
-                    <td>Vacaciones</td>
-                    <td><button class="eliminarBtn">Eliminar</button></td>
-                </tr>
-            </tbody>
-        </table>
-
-    </div>
-
-    <br>
-
-    <div class="section">
-        <h2>Reservas</h2>
-
-        <label for="reservas">
-            <input type="text" placeholder="ID Reserva">
-            <input type="text" placeholder="Cliente">
-            <input type="text" placeholder="Viaje">
-            <input type="date" >
-            <button class="button" id="reservaBtn">Añadir Reserva</button>
-        </label>
-    
-        
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Reserva</th>
-                    <th>Cliente</th>
-                    <th>Viaje</th>
-                    <th>Fecha</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Rarek Cruz</td>
-                    <td>Barcelona</td>
-                    <td>2023-10-15</td>
-                    <td><button class="eliminarBtn">Eliminar</button></td>
-                </tr>
-            </tbody>
-        </table>
+        <div id="reservas">
+            <h2>Reservas</h2>
+            <form id="formReservas">
+                <select id="cliente">
+                    <option value="" disabled selected>Selecciona un cliente</option>
+                </select>
+                <select id="viaje">
+                    <option value="" disabled selected>Selecciona un viaje</option>
+                </select>                <input type="date" id="fecha" name="fecha" required>
+                <button type="submit" class="button" id="reservaBtn">Añadir Reserva</button>
+            </form>
+            <table id="tablaReservas">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Viaje</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
     <script src="script.js"></script>
-
 </body>
 </html>
