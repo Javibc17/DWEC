@@ -65,6 +65,60 @@ document.addEventListener("DOMContentLoaded", function () {
     const reservasTabla = document.getElementById("tablaReservas")
 
     const clienteSelect = document.getElementById("cliente")
+    const viajeSelect = document.getElementById("viaje")
+
+    function cargarDatos() {
+        const clientesGuardados = JSON.parse(localStorage.getItem("clientes")) || []
+        const viajesGuardados = JSON.parse(localStorage.getItem("viajes")) || []
+        const reservasGuardadas = JSON.parse(localStorage.getItem("reservas")) || []
+
+        clientesGuardados.forEach(cliente => {
+            const fila = document.createElement("tr")
+            fila.innerHTML = `
+                <td>${cliente.nombre}</td>
+                <td>${cliente.apellido}</td>
+                <td>${cliente.email}</td>
+                <td>${cliente.telefono}</td>
+                <td><button class="eliminarBtn">Eliminar</button></td>
+            `
+            clientesTabla.appendChild(fila)
+
+            const opcion = document.createElement("option")
+            opcion.value = `${cliente.nombre} ${cliente.apellido}`
+            opcion.textContent = `${cliente.nombre} ${cliente.apellido}`
+            clienteSelect.appendChild(opcion)
+        })
+
+        viajesGuardados.forEach(viaje => {
+            const fila = document.createElement("tr")
+            fila.innerHTML = `
+                <td>${viaje.codigo}</td>
+                <td>${viaje.destino}</td>
+                <td>${viaje.precio}€</td>
+                <td>${viaje.tipo}</td>
+                <td><button class="eliminarBtn">Eliminar</button></td>
+            `
+            viajesTabla.querySelector("tbody").appendChild(fila)
+
+            const opcionViaje = document.createElement("option")
+            opcionViaje.value = viaje.codigo
+            opcionViaje.textContent = `(${viaje.codigo})`
+            viajeSelect.appendChild(opcionViaje)
+        })
+
+        reservasGuardadas.forEach(reserva => {
+            const fila = document.createElement("tr")
+            fila.innerHTML = `
+                <td>${reserva.cliente}</td>
+                <td>${reserva.viaje}</td>
+                <td>${reserva.fecha}</td>
+                <td><button class="eliminarBtn">Eliminar</button></td>
+            `
+            reservasTabla.querySelector("tbody").appendChild(fila)
+        })
+    }
+
+    cargarDatos()
 
     function validarEmail(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -95,6 +149,10 @@ document.addEventListener("DOMContentLoaded", function () {
             opcion.textContent = `${nuevoCliente.nombre} ${nuevoCliente.apellido}`
             clienteSelect.appendChild(opcion)
 
+            const clientesGuardados = JSON.parse(localStorage.getItem("clientes")) || []
+            clientesGuardados.push(nuevoCliente)
+            localStorage.setItem("clientes", JSON.stringify(clientesGuardados))
+
             limpiarCampos(["nombre", "apellidos", "correo", "telefono"])
         } else {
             alert("Por favor, rellena todos los campos correctamente.")
@@ -109,7 +167,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const destino = document.getElementById("destino").value
         const precio = document.getElementById("precio").value
         const tipo = document.getElementById("tipo").value
-        const viajeSelect = document.getElementById("viaje") 
     
         if (codigo && destino && precio > 0) {
             const nuevoViaje = new Viaje(codigo, destino, precio)
@@ -122,24 +179,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td><button class="eliminarBtn">Eliminar</button></td>
             `
             viajesTabla.querySelector("tbody").appendChild(fila)
-    
+
             const opcionViaje = document.createElement("option")
             opcionViaje.value = nuevoViaje.codigo
-            opcionViaje.textContent = `${nuevoViaje.destino} (${nuevoViaje.codigo})`
+            opcionViaje.textContent = `${nuevoViaje.codigo}`
             viajeSelect.appendChild(opcionViaje)
-    
+
+            const viajesGuardados = JSON.parse(localStorage.getItem("viajes")) || []
+            viajesGuardados.push({ codigo: nuevoViaje.codigo, destino: nuevoViaje.destino, precio: nuevoViaje.precio, tipo })
+            localStorage.setItem("viajes", JSON.stringify(viajesGuardados))
+
             limpiarCampos(["codigo", "destino", "precio"])
         } else {
             alert("Por favor, rellena todos los campos correctamente.")
         }
     }
-    
+
     viajeBtn.addEventListener("click", agregarViaje)
 
     function agregarReserva(event) {
         event.preventDefault();
         const cliente = clienteSelect.options[clienteSelect.selectedIndex].text;
-        const viajeSelect = document.getElementById("viaje");
         const viaje = viajeSelect.options[viajeSelect.selectedIndex].text;
         const fecha = document.getElementById("fecha").value;
     
@@ -152,20 +212,47 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td><button class="eliminarBtn">Eliminar</button></td>
             `;
             reservasTabla.querySelector("tbody").appendChild(fila);
+
+            const reservasGuardadas = JSON.parse(localStorage.getItem("reservas")) || []
+            reservasGuardadas.push({ cliente, viaje, fecha })
+            localStorage.setItem("reservas", JSON.stringify(reservasGuardadas))
+
             limpiarCampos(["fecha"]);
         } else {
             alert("Por favor, rellena todos los campos correctamente.");
         }
     }
-    
 
     reservaBtn.addEventListener("click", agregarReserva)
 
     function eliminarFila(event) {
         if (event.target.classList.contains("eliminarBtn")) {
-            event.target.closest("tr").remove()
+            const fila = event.target.closest("tr")
+            const tabla = fila.closest("table")
+    
+            
+        if (tabla === clientesTabla) {
+            const clientesGuardados = JSON.parse(localStorage.getItem("clientes")) || []
+            const nombreCliente = fila.cells[0].textContent + " " + fila.cells[1].textContent; 
+            const nuevosClientes = clientesGuardados.filter(cliente => `${cliente.nombre} ${cliente.apellido}` !== nombreCliente)
+            localStorage.setItem("clientes", JSON.stringify(nuevosClientes))
+            } else if (tabla === viajesTabla) {
+                const viajesGuardados = JSON.parse(localStorage.getItem("viajes")) || []
+                const codigoViaje = fila.cells[0].textContent; 
+                const nuevosViajes = viajesGuardados.filter(viaje => viaje.codigo !== codigoViaje)
+                localStorage.setItem("viajes", JSON.stringify(nuevosViajes))
+            } else if (tabla === reservasTabla) {
+                const reservasGuardadas = JSON.parse(localStorage.getItem("reservas")) || []
+                const clienteReserva = fila.cells[0].textContent; 
+                const viajeReserva = fila.cells[1].textContent;
+                const nuevasReservas = reservasGuardadas.filter(reserva => reserva.cliente !== clienteReserva || reserva.viaje !== viajeReserva)
+                localStorage.setItem("reservas", JSON.stringify(nuevasReservas))
+            }
+    
+            fila.remove() 
         }
     }
+    
 
     document.body.addEventListener("click", eliminarFila)
 
@@ -175,4 +262,5 @@ document.addEventListener("DOMContentLoaded", function () {
         })
     }
 })
+
 
